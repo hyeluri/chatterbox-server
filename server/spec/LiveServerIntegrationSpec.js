@@ -3,21 +3,21 @@ var expect = require('../../node_modules/chai/chai').expect;
 var basicServer = require('../basic-server').server;
 
 describe('Live Node Chat Server', function() {
-  it('Should respond to GET requests for /log with a 200 status code', function(done) {
+  it('8. Should respond to GET requests for /log with a 200 status code', function(done) {
     request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
       expect(response.statusCode).to.equal(200);
       done();
     });
   });
 
-  it('Should send back parsable stringified JSON', function(done) {
+  it('9. Should send back parsable stringified JSON', function(done) {
     request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
       expect(JSON.parse.bind(this, body)).to.not.throw();
       done();
     });
   });
 
-  it('Should send back an object', function(done) {
+  it('10. Should send back an object', function(done) {
     request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
       parsedBody = JSON.parse(body);
       expect(parsedBody).to.be.an('object');
@@ -25,7 +25,7 @@ describe('Live Node Chat Server', function() {
     });
   });
 
-  it('Should send an object containing a `results` array', function(done) {
+  it('11. Should send an object containing a `results` array', function(done) {
     request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
       parsedBody = JSON.parse(body);
       expect(parsedBody).to.be.an('object');
@@ -34,7 +34,7 @@ describe('Live Node Chat Server', function() {
     });
   });
 
-  it('Should accept POST requests to /send', function(done) {
+  it('12. Should accept POST requests to /send', function(done) {
     var requestParams = {method: 'POST',
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
@@ -48,7 +48,7 @@ describe('Live Node Chat Server', function() {
     });
   });
 
-  it('Should respond with messages that were previously posted', function(done) {
+  it('13. Should respond with messages that were previously posted', function(done) {
     var requestParams = {method: 'POST',
       uri: 'http://127.0.0.1:3000/classes/messages',
       json: {
@@ -67,7 +67,7 @@ describe('Live Node Chat Server', function() {
     });
   });
 
-  it('Should 404 when asked for a nonexistent file', function(done) {
+  it('14. Should 404 when asked for a nonexistent file', function(done) {
     request('http://127.0.0.1:3000/arglebargle', function(error, response, body) {
       expect(response.statusCode).to.equal(404);
       done();
