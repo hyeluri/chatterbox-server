@@ -1,36 +1,135 @@
 /* Import node's http module: */
+var express = require("express");
 var http = require("http");
+var path = require('path');
 var handleRequest = require('./request-handler.js').handler;
 
+var app = express();
 
-/* Every server needs to listen on a port with a unique number. The
- * standard port for HTTP servers is port 80, but that port is
- * normally already claimed by another server and/or not accessible
- * so we'll use a higher port number that is not likely to be taken: */
-var port = 3000;
+var defaultCorsHeaders = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-headers": "content-type, accept",
+  "access-control-max-age": 10 // Seconds.
+};
 
-/* For now, since you're running this server on your local machine,
- * we'll have it listen on the IP address 127.0.0.1, which is a
- * special address that always refers to localhost. */
-var ip = "127.0.0.1";
+app.use(express.json());
+app.use(app.router);
+app.use(express.static(path.join(__dirname, '../client')));
+app.set('port', process.env.PORT || 3000);
+app.set('ip', "127.0.0.1");
 
+var server = http.createServer(app);
+console.log("Listening on http://" + app.get('ip') + ":" + app.get('port'));
+server.listen(app.get('port'), app.get('ip'));
 
+app.all("*", function(req, res, next){
+  res.set(defaultCorsHeaders);
+  next();
+});
 
-/* We use node's http module to create a server. Note, we called it 'server', but
-we could have called it anything (myServer, blahblah, etc.). The function we pass it (handleRequest)
-will, unsurprisingly, handle all incoming requests. (ps: 'handleRequest' is in the 'request-handler' file).
-Lastly, we tell the server we made to listen on the given port and IP. */
-var server = http.createServer(handleRequest);
-console.log("Listening on http://" + ip + ":" + port);
-server.listen(port, ip);
+//app.get('/classes/:id', function())
 
-/* To start this server, run:
-     node basic-server.js
- *  on the command line.
+////////////////////////////////////
+//everything from request-handler
+////////////////////////////////////
 
- * To connect to the server, load http://127.0.0.1:8080 in your web
- * browser.
+var storage = [];
+var messageStorage = [];
 
- * server.listen() will continue running as long as there is the
- * possibility of serving more requests. To stop your server, hit
- * Ctrl-C on the command line. */
+var handleRequest = function(request, response) {
+  /* the 'request' argument comes from nodes http module. It includes info about the
+  request - such as what URL the browser is requesting. */
+
+  /* Documentation for both request and response can be found at
+   * http://nodemanual.org/0.8.14/nodejs_ref_guide/http.html */
+
+  console.log("Serving request type " + request.method + " for url " + request.url);
+
+  var statusCode = 200;
+
+  /* Without this line, this server wouldn't work. See the note
+   * below about CORS. */
+  var headers = defaultCorsHeaders;
+  headers['Content-Type'] = "text/plain";
+
+  if(request.method === "OPTIONS"){
+    response.writeHead(statusCode,headers);
+    response.end("ALLOW: GET POST OPTIONS");
+  }
+
+  if(request.url === '/classes/messages'){
+    messages(request,response,headers);
+  }
+
+  if(request.url.match(/\/classes\/room[0-9]*\/?/)){
+    //app.get('/classes/room:id', function(req, res){});
+    room(request,response,headers);
+  }else{
+
+    statusCode = 404;
+    /* .writeHead() tells our server what HTTP status code to send back */
+    response.writeHead(statusCode, headers);
+
+    /* Make sure to always call response.end() - Node will not send
+     * anything back to the client until you do. The string you pass to
+     * response.end() will be the body of the response - i.e. what shows
+     * up in the browser.*/
+
+    response.end("Request failed");
+  }
+};
+
+var messages = function(request,response,headers){
+
+  if(request.method === "GET"){
+    response.writeHead(200,headers);
+    //response.write();
+    var obj = JSON.stringify({
+      "results": messageStorage
+    });
+    response.end(obj);
+  }
+  if(request.method === "POST"){
+    var tempStore = "";
+    request.on('data', function(data){
+      tempStore += data;
+    });
+    request.on('end', function(){
+      messageStorage.push(JSON.parse(tempStore));
+    });
+    response.writeHead(201,headers);
+    response.end("posted");
+  }
+
+};
+
+var room = function(request,response,headers){
+
+  if(request.method === "GET"){
+    response.writeHead(200,headers);
+    //response.write();
+    var obj = JSON.stringify({
+      "results": storage
+    });
+    response.end(obj);
+  }
+  if(request.method === "POST"){
+    var tempStore = "";
+    request.on('data', function(data){
+      tempStore += data;
+    });
+    request.on('end', function(){
+      storage.push(JSON.parse(tempStore));
+    });
+    response.writeHead(201,headers);
+    response.end("posted");
+  }
+
+};
+
+/* These headers will allow Cross-Origin Resource Sharing (CORS).
+ * This CRUCIAL code allows this server to talk to websites that
+ * are on different domains. (Your chat client is running from a url
+ * like file://your/chat/client/index.html, which is considered a
+ * different domain.) */

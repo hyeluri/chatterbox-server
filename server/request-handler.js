@@ -23,11 +23,17 @@ var handleRequest = function(request, response) {
   var headers = defaultCorsHeaders;
   headers['Content-Type'] = "text/plain";
 
+  if(request.method === "OPTIONS"){
+    response.writeHead(statusCode,headers);
+    response.end("ALLOW: GET POST OPTIONS");
+  }
+
   if(request.url === '/classes/messages'){
     messages(request,response,headers);
   }
 
   if(request.url.match(/\/classes\/room[0-9]*\/?/)){
+    //app.get('/classes/room:id', function(req, res){});
     room(request,response,headers);
   }else{
 
