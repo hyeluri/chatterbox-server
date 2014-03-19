@@ -1,0 +1,1 @@
+var whatever = require('./server/basic-server.js');
