@@ -33,7 +33,7 @@
     send: function(message) {
       $.ajax({
         // always use this url
-        url: 'http://127.0.0.1:3000/classes/messages',
+        url: 'http://chatzerz-11723.onmodulus.net/classes/messages',
         type: 'POST',
         data: JSON.stringify(message),
         contentType: 'application/json',
@@ -51,7 +51,7 @@
       fetch: function() {
         $.ajax({
           // always use this url
-          url: 'http://127.0.0.1:3000/classes/messages',
+          url: 'http://chatzerz-11723.onmodulus.net/classes/messages',
           type: 'GET',
           contentType: 'application/json',
           data: {order: '-createdAt'},
