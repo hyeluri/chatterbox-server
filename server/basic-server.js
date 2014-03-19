@@ -22,12 +22,11 @@ app.use(express.json());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, '../client')));
 app.set('port', process.env.PORT || 3000);
-app.set('ip', "127.0.0.1");
 
 
 var server = http.createServer(app);
-console.log("Listening on http://" + app.get('ip') + ":" + app.get('port'));
-server.listen(app.get('port'), app.get('ip'));
+console.log("Listening on port "+ app.get('port'));
+server.listen(app.get('port'));
 
 app.all("*", function(req, res, next){
   res.set(defaultCorsHeaders);
