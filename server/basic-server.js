@@ -5,9 +5,9 @@ var path = require('path');
 var handleRequest = require('./request-handler.js').handler;
 var fs = require('fs');
 
-var databaseUrl = "chatterbox:mrchattersworth@oceanic.mongohq.com:10017/norman_harry"; // "username:password@example.com/mydb"
+var databaseUrl = process.env.mongoURL || "localMongo";
 var collections = ["messages"];
-var db = require("mongojs").connect(databaseUrl, collections);
+var db = require("mongojs")(databaseUrl, collections);
 
 var app = express();
 
